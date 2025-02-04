@@ -75,9 +75,9 @@ async def process_start_command_user(message: Message, state: FSMContext, bot: B
     elif user.role == rq.UserRole.admin:
         await message.answer(text=f'Добро пожаловать! Вы являетесь АДМИНИСТРАТОРОМ проекта',
                              reply_markup=kb.keyboard_start(role=rq.UserRole.admin))
-    if await check_super_admin(telegram_id=message.from_user.id):
-        await message.answer(text=f'Изменить свою роль?',
-                             reply_markup=kb.keyboard_change_role_admin())
+    # if await check_super_admin(telegram_id=message.from_user.id):
+    #     await message.answer(text=f'Изменить свою роль?',
+    #                          reply_markup=kb.keyboard_change_role_admin())
 
 
 @router.callback_query(F.data == 'change_role_admin')
