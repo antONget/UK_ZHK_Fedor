@@ -19,12 +19,6 @@ import logging
 router = Router()
 
 
-# class Mailing(StatesGroup):
-#     survey = State()
-#     option = State()
-#     notification = State()
-
-
 @router.callback_query(F.data.startswith('assign_performer_'))
 @error_handler
 async def process_del_admin(callback: CallbackQuery, state: FSMContext, bot: Bot) -> None:
@@ -110,7 +104,7 @@ async def process_back_del_admin(callback: CallbackQuery, state: FSMContext, bot
 @error_handler
 async def process_select_executor(callback: CallbackQuery, state: FSMContext, bot: Bot) -> None:
     """
-    Назначение исполнителя
+    Назначение исполнителя на заявку
     :param callback:
     :param state:
     :param bot:
@@ -154,4 +148,6 @@ async def process_select_executor(callback: CallbackQuery, state: FSMContext, bo
                                 f' все опубликованные заявки в разделе "ЗАЯВКИ"')
     await rq.set_order_status(order_id=int(order_id),
                               status=rq.OrderStatus.work)
+    await rq.set_order_executor(order_id=int(order_id),
+                                executor=tg_id_executor)
     await callback.answer()

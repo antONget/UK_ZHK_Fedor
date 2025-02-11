@@ -81,6 +81,7 @@ async def get_text_order(message: Message, state: FSMContext, bot: Bot) -> None:
         data = await state.get_data()
         photo_order: list = data['photo_order']
         photo_order.append(photo_id)
+        await state.update_data(photo_order=photo_order)
         await message.answer(text='Ваше сообщение получено можете добавить еще фото',
                              reply_markup=kb.keyboard_send_order())
 

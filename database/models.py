@@ -34,6 +34,8 @@ class Order(Base):
     deadline: Mapped[str] = mapped_column(String)
     date_solution: Mapped[str] = mapped_column(String, default='')
     executor: Mapped[int] = mapped_column(BigInteger, default=0)
+    text_report: Mapped[str] = mapped_column(String, default='')
+    photo_ids_report: Mapped[str] = mapped_column(String, default='')
     quality: Mapped[int] = mapped_column(Integer, default=-1)
     comment: Mapped[str] = mapped_column(String, default='')
 

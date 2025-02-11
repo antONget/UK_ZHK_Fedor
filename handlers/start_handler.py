@@ -65,7 +65,7 @@ async def process_start_command_user(message: Message, state: FSMContext, bot: B
             await state.set_state(PersonalData.fullname)
         else:
             await message.answer(text=f'{user.full_name}, рады вас видеть снова!',
-                                 reply_markup=kb.keyboard_start(role=rq.UserRole.executor))
+                                 reply_markup=kb.keyboard_start(role=rq.UserRole.user))
     # партнер
     elif user.role == rq.UserRole.executor:
         await message.answer(text=f'Добро пожаловать! Вы являетесь ИСПОЛНИТЕЛЕМ в проекте',
