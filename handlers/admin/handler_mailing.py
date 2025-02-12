@@ -217,3 +217,4 @@ async def send_notification(callback: CallbackQuery, state: FSMContext, bot: Bot
         await callback.message.edit_text(text='Отправка оповещения отменено',
                                          reply_markup=None)
     await state.set_state(state=None)
+    await callback.answer()
