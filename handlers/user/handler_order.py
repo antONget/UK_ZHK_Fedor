@@ -130,6 +130,7 @@ async def get_deadline(message: Message, state: FSMContext, bot: Bot) -> None:
         deadline_data_str = deadline_data.strftime('%d-%m-%Y %H:%M')
         current_date_str = current_date.strftime('%d-%m-%Y %H:%M')
         data_order = {"tg_id": message.from_user.id,
+                      "type_order": data["type_order"],
                       "text_order": data["text_order"],
                       "photo_ids": ','.join(data["photo_order"]) if data["photo_order"] else '',
                       "status": rq.OrderStatus.create,
@@ -144,12 +145,12 @@ async def get_deadline(message: Message, state: FSMContext, bot: Bot) -> None:
             await send_message_admins_text(bot=bot,
                                            text=f'Пользователь <a href="tg://user?id={message.from_user.id}">'
                                                 f'{message.from_user.username}</a> разместил заявку'
-                                                f' № {order_id}',
+                                                f' № {order_id} - {data["type_order"]}',
                                            keyboard=kb.keyboard_assign_performer(order_id=order_id))
         else:
             await send_message_admins_text(bot=bot,
                                            text=f'Пользователь <a href="tg://user?id={message.from_user.id}">'
                                                 f'{message.from_user.username}</a> разместил заявку'
-                                                f' № {order_id}\n\n'
+                                                f' № {order_id} - - {data["type_order"]}\n\n'
                                                 f'{data["text_order"]}',
                                            keyboard=kb.keyboard_assign_performer(order_id=order_id))

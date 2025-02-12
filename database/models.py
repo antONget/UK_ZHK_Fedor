@@ -27,6 +27,7 @@ class Order(Base):
     __tablename__ = 'orders'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     tg_id: Mapped[int] = mapped_column(BigInteger)
+    type_order: Mapped[str] = mapped_column(String)
     text_order: Mapped[str] = mapped_column(String)
     photo_ids: Mapped[str] = mapped_column(String)
     status: Mapped[str] = mapped_column(String)

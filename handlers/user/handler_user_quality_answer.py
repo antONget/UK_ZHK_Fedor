@@ -63,7 +63,8 @@ async def quality_answer_order(callback: CallbackQuery, state: FSMContext, bot: 
                                          reply_markup=None)
         text_quality = '⭐' * quality
         await bot.send_message(chat_id=info_order.executor,
-                               text=f"Пользователь #_{info_user.id} оценил качество выполнения заявки"
+                               text=f"Пользователь <a href='tg://user?id={callback.from_user.id}'>"
+                                    f"{callback.from_user.username}</a> оценил качество выполнения заявки"
                                     f" № {info_order.id} на {text_quality}")
     elif quality > 0:
         await callback.message.edit_text(text='Благодарим за обратную связь, нам очень важна ваша оценка!\n'

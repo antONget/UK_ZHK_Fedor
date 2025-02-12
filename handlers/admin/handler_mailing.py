@@ -10,6 +10,7 @@ import database.requests as rq
 from database.models import User
 from filter.admin_filter import IsSuperAdmin
 from utils.error_handling import error_handler
+from utils.send_admins import send_message_admins_text
 
 
 import asyncio
@@ -90,6 +91,7 @@ async def poll(message: Message, state: FSMContext, bot: Bot):
     list_option: list = data['list_option']
     list_option.append(message.text)
     if len(list_option) > 1:
+        await state.update_data(options=list_option)
         await message.answer_poll(question=data['question_survey'],
                                   options=list_option,
                                   type='quiz',
@@ -101,9 +103,40 @@ async def poll(message: Message, state: FSMContext, bot: Bot):
         await message.answer(text='Добавьте вариант ответа')
 
 
+@router.callback_query(F.data == 'send_survey')
+@error_handler
+async def send_survey(callback: CallbackQuery, state: FSMContext, bot: Bot):
+    """
+    Отправка опроса
+    :param callback:
+    :param state:
+    :param bot:
+    :return:
+    """
+    await state.set_state(state=None)
+    users_list: list[User] = await rq.get_users_role(role=rq.UserRole.user)
+    data: dict = await state.get_data()
+    question: str = data['question_survey']
+    options: list = data['options']
+    await callback.message.answer(text=f'Рассылка опроса запущена на {len(users_list)} пользователей')
+    count: int = 0
+    for user in users_list:
+        try:
+            await bot.send_poll(chat_id=user.tg_id,
+                                question=question,
+                                options=options,
+                                type='quiz',
+                                correct_option_id=1,
+                                is_anonymous=False)
+            count += 1
+        except:
+            pass
+    await callback.message.answer(text=f'Опрос успешно разослан до {count}/{len(users_list)} пользователей')
+
+
 @router.poll_answer()
 @error_handler
-async def poll_answer(poll_answer: PollAnswer):
+async def poll_answer(poll_answer: PollAnswer, bot: Bot):
     """
     Получаем результаты опроса
     :param poll_answer:
@@ -113,7 +146,9 @@ async def poll_answer(poll_answer: PollAnswer):
     answer_ids = poll_answer.option_ids  # list of answers
     user_id = poll_answer.user.id
     poll_id = poll_answer.poll_id
-    print(answer_ids, user_id, poll_id)
+    await send_message_admins_text(bot=bot,
+                                   text=f'answer_ids: {answer_ids}, user_id: {user_id}, poll_id: {poll_id}',
+                                   keyboard=None)
 
 
 @router.callback_query(F.data == 'notification')

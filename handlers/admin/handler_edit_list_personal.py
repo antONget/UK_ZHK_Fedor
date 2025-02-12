@@ -106,14 +106,18 @@ async def get_id_tg_personal(message: Message, state: FSMContext, bot: Bot):
         await rq.set_user_role(tg_id=tg_id_personal, role=rq.UserRole.executor)
         await message.answer(text=f'Пользователь <a href="tg://user?id={user.tg_id}">{user.username}</a>'
                                   f' добавлен в список {role}')
-        await bot.send_message(chat_id=tg_id_personal,
-                               text='Вы назначены <b>ИСПОНИТЕЛЕМ</b> в проекте,'
-                                    ' при необходимости перезапустите бота /start')
+        try:
+            await bot.send_message(chat_id=tg_id_personal,
+                                   text='Вы назначены <b>ИСПОНИТЕЛЕМ</b> в проекте,'
+                                        ' при необходимости перезапустите бота /start')
+        except:
+            await message.answer(text=f'Пользователь c id={tg_id_personal} еще не запускал бот,'
+                                      f'после запуска бота у него будет доступен функционал <b>ИСПОЛНИТЕЛЯ</b>')
         await state.set_state(state=None)
-    else:
-        await message.answer(text=f'Пользователь c id={tg_id_personal} в базе данных не найден. '
-                                  f'Для того чтобы назначить пользователя партнером он обязательно должен'
-                                  f' запустить бота')
+    # else:
+    #     await message.answer(text=f'Пользователь c id={tg_id_personal} в базе данных не найден. '
+    #                               f'Для того чтобы назначить пользователя партнером он обязательно должен'
+    #                               f' запустить бота')
     await state.set_state(state=None)
 
 

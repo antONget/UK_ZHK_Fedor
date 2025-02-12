@@ -22,7 +22,7 @@ router = Router()
 
 
 class StateReport(StatesGroup):
-    text_report = State()
+    text_report_state = State()
     photo_report = State()
 
 
@@ -107,11 +107,11 @@ async def select_type_order(callback: CallbackQuery, state: FSMContext, bot: Bot
     if type_select == 'select' and type_order == 'work':
         order_id: int = int(callback.data.split('_')[-1])
         await state.update_data(report_id=order_id)
-        await state.update_data(photo_order=[])
+        await state.update_data(photo_report=[])
         await callback.message.edit_text(text=f'Пришлите отчет о выполненной заявке №{order_id}',
                                          reply_markup=None)
-        await state.update_data(photo_order=[])
-        await state.set_state(StateReport.text_report)
+        await state.update_data(photo_report=[])
+        await state.set_state(StateReport.text_report_state)
         await callback.answer()
         return
 
@@ -174,7 +174,7 @@ async def select_type_order(callback: CallbackQuery, state: FSMContext, bot: Bot
     await callback.answer()
 
 
-@router.message(F.text, StateFilter(StateReport.text_report))
+@router.message(F.text, StateFilter(StateReport.text_report_state))
 @router.message(F.photo, StateFilter(StateReport.photo_report))
 @error_handler
 async def get_text_order(message: Message, state: FSMContext, bot: Bot) -> None:
@@ -188,15 +188,15 @@ async def get_text_order(message: Message, state: FSMContext, bot: Bot) -> None:
     logging.info(f'get_text_order: {message.chat.id}')
     if message.text:
         text_order = message.text
-        await state.update_data(text_order=text_order)
+        await state.update_data(text_report=text_order)
         await message.answer(text='Ваш отчет получен можете добавить фото',
                              reply_markup=kb.keyboard_send_report())
     elif message.photo:
         photo_id = message.photo[-1].file_id
         data = await state.get_data()
-        photo_order: list = data['photo_order']
-        photo_order.append(photo_id)
-        await state.update_data(photo_order=photo_order)
+        photo_report: list = data['photo_report']
+        photo_report.append(photo_id)
+        await state.update_data(photo_report=photo_report)
         await message.answer(text='Ваши материалы получены можете добавить еще фото',
                              reply_markup=kb.keyboard_send_report())
 
@@ -229,11 +229,12 @@ async def send_report(callback: CallbackQuery, state: FSMContext, bot: Bot) -> N
         await rq.set_order_date_solution(order_id=int(report_id), date_solution=current_date)
         await rq.set_order_report(order_id=int(report_id),
                                   text_report=data['text_report'],
-                                  photo_ids_report=data['photo_ids_report'])
+                                  photo_ids_report=','.join(data["photo_report"]) if data["photo_report"] else '')
         info_order: Order = await rq.get_order_id(order_id=int(report_id))
         await send_message_admins_text(bot=bot,
                                        text=f'Отчет о выполнении заявки № {report_id} от  '
-                                            f'<a href="tg://user?id={info_order.executor}">исполнителя</a> получен')
+                                            f'<a href="tg://user?id={info_order.executor}">исполнителя</a> получен',
+                                       keyboard=None)
         if info_order.photo_ids_report:
             for photo_id in info_order.photo_ids_report.split(','):
                 try:

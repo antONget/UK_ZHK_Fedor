@@ -132,20 +132,20 @@ async def process_select_executor(callback: CallbackQuery, state: FSMContext, bo
         await bot.send_media_group(chat_id=tg_id_executor,
                                    media=media_group)
     await bot.send_message(chat_id=tg_id_executor,
-                           text=f'Вы назначены <b>ИСПОЛНИТЕЛЕМ</b> в для решения заявки № {order_id}.'
+                           text=f'Вы назначены <b>ИСПОЛНИТЕЛЕМ</b> в для решения заявки № {order_id}'
+                                f' - {info_order.type_order}.'
                                 f'После решения отправьте отчет выбрав номер обращения в разделе "ЗАЯВКИ"',
                            reply_markup=None)
-    await callback.message.answer(text=f'Пользователь'
-                                       f' <a href="tg://user?id={tg_id_executor}">{info_executor.username}</a> '
-                                       f'назначен для выполнения заявки № {order_id}.\n'
-                                       f'Статус заявки поступит вам при ее изменении, а также вы можете просмотреть'
-                                       f' все опубликованные заявки в разделе "ЗАЯВКИ"')
+    await callback.message.edit_text(text=f'Пользователь'
+                                          f' <a href="tg://user?id={tg_id_executor}">{info_executor.username}</a> '
+                                          f'назначен для выполнения заявки № {order_id} - {info_order.type_order}.\n'
+                                          f'Статус заявки поступит вам при ее изменении, а также вы можете просмотреть'
+                                          f' все опубликованные заявки в разделе "ЗАЯВКИ"')
     await bot.send_message(chat_id=info_order.tg_id,
                            text=f'Пользователь'
                                 f' <a href="tg://user?id={tg_id_executor}">{info_executor.username}</a> '
-                                f'назначен для выполнения заявки № {order_id}.\n'
-                                f'Статус заявки поступит вам при ее изменении, а также вы можете просмотреть'
-                                f' все опубликованные заявки в разделе "ЗАЯВКИ"')
+                                f'назначен для выполнения заявки № {order_id} - {info_order.type_order}.\n'
+                                f'Статус заявки поступит вам при ее изменении')
     await rq.set_order_status(order_id=int(order_id),
                               status=rq.OrderStatus.work)
     await rq.set_order_executor(order_id=int(order_id),

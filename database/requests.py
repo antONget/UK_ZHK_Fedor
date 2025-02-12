@@ -124,6 +124,12 @@ class OrderStatus:
     completed = "completed"
 
 
+@dataclass
+class OrderType:
+    private = "Частные"
+    general = "Общедомовые"
+
+
 async def add_order(data: dict) -> int:
     """
     Добавление заявки пользователя
@@ -194,6 +200,7 @@ async def set_order_report(order_id: int, text_report: str, photo_ids_report: st
         order = await session.scalar(select(Order).where(Order.id == order_id))
         order.text_report = text_report
         order.photo_ids_report = photo_ids_report
+        order.status = OrderStatus.completed
         await session.commit()
 
 
