@@ -110,7 +110,6 @@ async def select_type_order(callback: CallbackQuery, state: FSMContext, bot: Bot
         await state.update_data(photo_report=[])
         await callback.message.edit_text(text=f'Пришлите отчет о выполненной заявке №{order_id}',
                                          reply_markup=None)
-        await state.update_data(photo_report=[])
         await state.set_state(StateReport.text_report_state)
         await callback.answer()
         return
