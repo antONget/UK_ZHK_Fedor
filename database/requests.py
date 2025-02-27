@@ -1,4 +1,4 @@
-from database.models import User, Order, async_session
+from database.models import User, Order, ShopCafe, async_session
 from sqlalchemy import select, or_, and_
 import logging
 from dataclasses import dataclass
@@ -261,4 +261,72 @@ async def set_order_comment(order_id: int, comment: str) -> None:
         order = await session.scalar(select(Order).where(Order.id == order_id))
         if order:
             order.comment = comment
+            await session.commit()
+
+
+""" INFRASTRUCTURE """
+
+
+@dataclass
+class OrderStatus:
+    create = "create"
+    work = "work"
+    cancel = "cancel"
+    completed = "completed"
+
+
+@dataclass
+class InfrastructureType:
+    shop = "shop"
+    cafe = "cafe"
+
+
+async def add_infrastructure(data: dict) -> int:
+    """
+    Добавление инфраструктуры
+    :param data:
+    :return:
+    """
+    logging.info(f'add_infrastructure')
+    async with async_session() as session:
+        new_ = ShopCafe(**data)
+        session.add(new_)
+        await session.flush()
+        id_ = new_.id
+        await session.commit()
+        return id_
+
+
+async def get_infrastructures() -> list[ShopCafe]:
+    """
+    Получаем список инфраструктуры
+    :return:
+    """
+    logging.info('get_infrastructures')
+    async with async_session() as session:
+        shops_cafes = await session.scalars(select(ShopCafe))
+        return [shop_cafe for shop_cafe in shops_cafes]
+
+
+async def get_infrastructures_type(type_object: str) -> list[ShopCafe]:
+    """
+    Получаем список инфраструктуры заданного типа
+    :return:
+    """
+    logging.info('get_infrastructures_type')
+    async with async_session() as session:
+        shops_cafes = await session.scalars(select(ShopCafe).where(ShopCafe.type == type_object))
+        return [shop_cafe for shop_cafe in shops_cafes]
+
+
+async def del_infrastructures_id(id_: int) -> None:
+    """
+    Удаляем объект из БД
+    :return:
+    """
+    logging.info('del_infrastructures_id')
+    async with async_session() as session:
+        shop_cafe = await session.scalar(select(ShopCafe).where(ShopCafe.id == id_))
+        if shop_cafe:
+            await session.delete(shop_cafe)
             await session.commit()

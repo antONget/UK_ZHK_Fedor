@@ -41,8 +41,12 @@ class Order(Base):
     comment: Mapped[str] = mapped_column(String, default='')
 
 
-
-
+class ShopCafe(Base):
+    __tablename__ = 'shop_cafe'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    photo: Mapped[str] = mapped_column(String)
+    description: Mapped[str] = mapped_column(String)
+    type: Mapped[str] = mapped_column(String)
 
 
 async def async_main():

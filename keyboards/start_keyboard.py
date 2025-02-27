@@ -24,7 +24,8 @@ def keyboard_start(role: str) -> ReplyKeyboardMarkup:
         button_2 = KeyboardButton(text='Рассылка')
         button_3 = KeyboardButton(text='Отчет')
         button_4 = KeyboardButton(text='Заявки')
-        keyboard = ReplyKeyboardMarkup(keyboard=[[button_1], [button_2], [button_3]],
+        button_5 = KeyboardButton(text='Инфраструктура')
+        keyboard = ReplyKeyboardMarkup(keyboard=[[button_1], [button_2], [button_3], [button_4], [button_5]],
                                        resize_keyboard=True)
     elif role == UserRole.executor:
         button_1 = KeyboardButton(text='Отчет')

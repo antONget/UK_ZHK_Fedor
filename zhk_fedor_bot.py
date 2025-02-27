@@ -6,8 +6,8 @@ from config_data.config import Config, load_config
 from handlers import error, other_handlers, start_handler
 from handlers.partner import handler_report, handler_select_order
 from handlers.user import handler_personal_account, handler_personal_data, handler_order, handler_receipt, \
-    handler_user_quality_answer
-from handlers.admin import handler_edit_list_personal, handler_mailing, handler_select_executor
+    handler_user_quality_answer, handler_shop_cafe
+from handlers.admin import handler_edit_list_personal, handler_mailing, handler_select_executor, handler_admin_shop_cafe
 from notify_admins import on_startup_notify
 from database.models import async_main
 
@@ -48,13 +48,15 @@ async def main():
     dp.include_routers(handler_edit_list_personal.router,
                        handler_mailing.router,
                        handler_report.router,
-                       handler_select_executor.router)
+                       handler_select_executor.router,
+                       handler_admin_shop_cafe.router)
     dp.include_router(handler_select_order.router)
     dp.include_routers(handler_personal_account.router,
                        handler_personal_data.router,
                        handler_order.router,
                        handler_receipt.router,
-                       handler_user_quality_answer.router)
+                       handler_user_quality_answer.router,
+                       handler_shop_cafe.router)
     dp.include_router(other_handlers.router)
 
     # Пропускаем накопившиеся update и запускаем polling
