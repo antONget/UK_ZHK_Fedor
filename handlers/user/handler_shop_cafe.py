@@ -38,7 +38,7 @@ async def press_button_order(message: Message, bot: Bot) -> None:
                          reply_markup=kb.keyboard_type_shop_cafe_user())
 
 
-@router.callback_query(F.data.startswith('type_infrastructure_'))
+@router.callback_query(F.data.startswith('utype_infrastructure_'))
 @error_handler
 async def get_type_infrastructure(callback: CallbackQuery, state: FSMContext, bot: Bot):
     """
@@ -77,7 +77,9 @@ async def send_order(callback: CallbackQuery, state: FSMContext, bot: Bot) -> No
     :return:
     """
     logging.info(f'process_change_attribute: {callback.from_user.id} ')
-    list_shop_cafe: list[ShopCafe] = await rq.get_infrastructures()
+    data = await state.get_data()
+    type_object = data['type_object']
+    list_shop_cafe: list[ShopCafe] = await rq.get_infrastructures_type(type_object=type_object)
     page = int(callback.data.split('_')[-1])
     if list_shop_cafe:
         if list_shop_cafe:

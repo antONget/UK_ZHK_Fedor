@@ -172,6 +172,19 @@ async def get_orders_tg_id_status(tg_id_executor: int, status: str) -> list[Orde
         return list_order
 
 
+async def get_orders_all_status(status: str) -> list[Order]:
+    """
+    Получаем заявки по заданному статусу
+    :param status:
+    :return:
+    """
+    logging.info('get_orders_all_status')
+    async with async_session() as session:
+        orders = await session.scalars(select(Order).where(Order.status == status))
+        list_order = [order for order in orders]
+        return list_order
+
+
 async def set_order_status(order_id: int, status: str) -> None:
     """
     Обновление статуса заявки

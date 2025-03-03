@@ -24,7 +24,6 @@ class ReceiptState(StatesGroup):
     receipt = State()
 
 
-
 @router.message(F.text == 'Квитанция')
 @error_handler
 async def press_button_receipt(message: Message, bot: Bot) -> None:
@@ -36,7 +35,8 @@ async def press_button_receipt(message: Message, bot: Bot) -> None:
     """
     logging.info(f'press_button_receipt: {message.chat.id}')
     info_user: User = await rq.get_user_by_id(tg_id=message.from_user.id)
-    answer: bool = await search_receipt(receipt=info_user.personal_account, personal_account=info_user.personal_account)
+    answer: bool = await search_receipt(receipt=info_user.personal_account,
+                                        personal_account=info_user.personal_account)
     if answer:
         await message.answer_document(document=FSInputFile(f'receipt/{info_user.personal_account}.pdf'))
     else:
@@ -44,23 +44,23 @@ async def press_button_receipt(message: Message, bot: Bot) -> None:
     # await message.answer(text=f'Пришлите номер вашего лицевого, например <code>7811722454330</code>')
 
 
-@router.message(F.text, StateFilter(ReceiptState.receipt))
-@error_handler
-async def get_receipt(message: Message, state: FSMContext, bot: Bot):
-    """
-    Получаем номер лицевого счета пользователя
-    :param message:
-    :param state:
-    :param bot:
-    :return:
-    """
-    logging.info(f'get_receipt: {message.chat.id}')
-    receipt_user = message.text
-    if receipt_user.isdigit():
-        await search_receipt(receipt=receipt_user, tg_id=message.from_user.id)
-        await bot.send_document(chat_id=config.tg_bot.support_id,
-                                document=FSInputFile(f'utils/{message.from_user.id}_subset.pdf'))
-    else:
-        await message.answer(text='Лицевой счет введен некорректно')
+# @router.message(F.text, StateFilter(ReceiptState.receipt))
+# @error_handler
+# async def get_receipt(message: Message, state: FSMContext, bot: Bot):
+#     """
+#     Получаем номер лицевого счета пользователя
+#     :param message:
+#     :param state:
+#     :param bot:
+#     :return:
+#     """
+#     logging.info(f'get_receipt: {message.chat.id}')
+#     receipt_user = message.text
+#     if receipt_user.isdigit():
+#         await search_receipt(receipt=receipt_user, tg_id=message.from_user.id)
+#         await bot.send_document(chat_id=config.tg_bot.support_id,
+#                                 document=FSInputFile(f'utils/{message.from_user.id}_subset.pdf'))
+#     else:
+#         await message.answer(text='Лицевой счет введен некорректно')
 
 

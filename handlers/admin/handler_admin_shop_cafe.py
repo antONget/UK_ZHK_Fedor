@@ -1,5 +1,5 @@
 from aiogram import F, Router, Bot
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, InputMediaPhoto
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import StateFilter
 from aiogram.fsm.state import State, StatesGroup
@@ -27,14 +27,17 @@ class InfrastructureState(StatesGroup):
 
 @router.message(F.text == 'Инфраструктура', IsRoleAdmin())
 @error_handler
-async def press_button_infrastructure(message: Message, bot: Bot) -> None:
+async def press_button_infrastructure(message: Message, state: FSMContext, bot: Bot) -> None:
     """
     Запуск процедуры отправки заявки
     :param message:
+    :param state:
     :param bot:
     :return:
     """
     logging.info(f'press_button_infrastructure: {message.chat.id}')
+    await state.set_state(state=None)
+    await state.clear()
     await message.answer(text='Выберите действие для объекта инфраструктуры',
                          reply_markup=kb.keyboard_type_shop_cafe_action())
 
@@ -53,11 +56,12 @@ async def get_type_infrastructure(callback: CallbackQuery, state: FSMContext, bo
     action = callback.data.split('_')[-1]
     await state.update_data(action_object=action)
     if action == 'add':
-        await callback.message.answer(text='Выберите тип инфраструктуры для добавления',
-                                      reply_markup=kb.keyboard_type_shop_cafe_user())
+        await callback.message.edit_text(text='Выберите тип инфраструктуры для добавления',
+                                         reply_markup=kb.keyboard_type_shop_cafe_user())
     else:
-        await callback.message.answer(text='Выберите тип инфраструктуры для удаления',
-                                      reply_markup=kb.keyboard_type_shop_cafe_user())
+        await callback.message.edit_text(text='Выберите тип инфраструктуры для удаления',
+                                         reply_markup=kb.keyboard_type_shop_cafe_user())
+
 
 @router.callback_query(F.data.startswith('type_infrastructure_'))
 @error_handler
@@ -146,6 +150,7 @@ async def get_text_shop_cafe(message: Message, state: FSMContext, bot: Bot) -> N
     if message.text:
         text_description = message.text
         await state.update_data(text_shop_cafe=text_description)
+        await state.update_data(photo_shop_cafe='')
         data = await state.get_data()
         type_object = data['type_object']
         place = 'КАФЕ'
@@ -176,14 +181,21 @@ async def send_object(callback: CallbackQuery, state: FSMContext, bot: Bot) -> N
     logging.info(f'send_object: {callback.from_user.id} ')
     answer = callback.data.split('_')[-1]
     if answer == 'photo':
-        await callback.message.edit_text(text='Пришлите фото к заявке',
-                                         reply_markup=None)
+        await callback.message.delete()
+        await callback.message.answer(text='Пришлите фото к заявке',
+                                      reply_markup=None)
         await state.set_state(InfrastructureState.photo)
     elif answer == 'continue':
         await state.set_state(state=None)
-        await callback.message.edit_text(text='Объект успешно добавлен',
-                                         reply_markup=None)
         data = await state.get_data()
+        try:
+            await callback.message.edit_text(text='Объект успешно добавлен',
+                                             reply_markup=None)
+        except:
+            await callback.message.edit_media(media=InputMediaPhoto(media=data['photo_shop_cafe'],
+                                                                    caption=f'{data["text_shop_cafe"]}\n\n'
+                                                                            f'Объект успешно добавлен'),
+                                              reply_markup=None)
         photo_id = data['photo_shop_cafe']
         description = data['text_shop_cafe']
         type_object = data['type_object']

@@ -57,6 +57,8 @@ async def select_type_order(callback: CallbackQuery, state: FSMContext, bot: Bot
     if type_order == 'work':
         orders: list[Order] = await rq.get_orders_tg_id_status(tg_id_executor=callback.from_user.id,
                                                                status=rq.OrderStatus.work)
+        if await check_super_admin(telegram_id=callback.from_user.id):
+            orders: list[Order] = await rq.get_orders_all_status(status=rq.OrderStatus.work)
         if orders:
             info_user: User = await rq.get_user_by_id(tg_id=orders[0].tg_id)
             autor_order = f'<b>Заявка №{orders[0].id}</b>\n' \
@@ -72,6 +74,8 @@ async def select_type_order(callback: CallbackQuery, state: FSMContext, bot: Bot
     if type_order == 'completed':
         orders: list[Order] = await rq.get_orders_tg_id_status(tg_id_executor=callback.from_user.id,
                                                                status=rq.OrderStatus.completed)
+        if await check_super_admin(telegram_id=callback.from_user.id):
+            orders: list[Order] = await rq.get_orders_all_status(status=rq.OrderStatus.completed)
         if orders:
             info_user: User = await rq.get_user_by_id(tg_id=orders[0].tg_id)
             autor_order = f'<b>Заявка №{orders[0].id}</b>\n' \
@@ -123,6 +127,8 @@ async def select_type_order(callback: CallbackQuery, state: FSMContext, bot: Bot
     if type_order == 'work':
         orders: list[Order] = await rq.get_orders_tg_id_status(tg_id_executor=callback.from_user.id,
                                                                status=rq.OrderStatus.work)
+        if await check_super_admin(telegram_id=callback.from_user.id):
+            orders: list[Order] = await rq.get_orders_all_status(status=rq.OrderStatus.work)
         count_item = len(orders)
         if block == count_item:
             block = 0
@@ -146,6 +152,8 @@ async def select_type_order(callback: CallbackQuery, state: FSMContext, bot: Bot
     elif type_order == 'completed':
         orders: list[Order] = await rq.get_orders_tg_id_status(tg_id_executor=callback.from_user.id,
                                                                status=rq.OrderStatus.completed)
+        if await check_super_admin(telegram_id=callback.from_user.id):
+            orders: list[Order] = await rq.get_orders_all_status(status=rq.OrderStatus.completed)
         count_item = len(orders)
         if block == count_item:
             block = 0
