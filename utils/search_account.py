@@ -1,5 +1,5 @@
 from PyPDF2 import PdfReader, PdfWriter
-
+import os
 
 async def search_receipt(receipt: str, personal_account: str) -> bool:
     """
@@ -9,6 +9,8 @@ async def search_receipt(receipt: str, personal_account: str) -> bool:
     :return:
     """
     reader = PdfReader("utils/search.pdf")
+    if os.path.exists("utils/new_search.pdf"):
+        reader = PdfReader("utils/new_search.pdf")
     numpages = len(reader.pages)
     for page_number in range(0, numpages):
         page = reader.pages[page_number]

@@ -7,7 +7,8 @@ from handlers import error, other_handlers, start_handler
 from handlers.partner import handler_report, handler_select_order
 from handlers.user import handler_personal_account, handler_personal_data, handler_order, handler_receipt, \
     handler_user_quality_answer, handler_shop_cafe, handler_support
-from handlers.admin import handler_edit_list_personal, handler_mailing, handler_select_executor, handler_admin_shop_cafe
+from handlers.admin import handler_edit_list_personal, handler_mailing, handler_select_executor, \
+    handler_admin_shop_cafe, handler_admin_reciept
 from notify_admins import on_startup_notify
 from database.models import async_main
 
@@ -27,8 +28,8 @@ async def main():
     # Конфигурируем логирование
     logging.basicConfig(
         level=logging.INFO,
-        filename="py_log.log",
-        filemode='w',
+        # filename="py_log.log",
+        # filemode='w',
         format='%(filename)s:%(lineno)d #%(levelname)-8s '
                '[%(asctime)s] - %(name)s - %(message)s')
 
@@ -49,7 +50,8 @@ async def main():
                        handler_mailing.router,
                        handler_report.router,
                        handler_select_executor.router,
-                       handler_admin_shop_cafe.router)
+                       handler_admin_shop_cafe.router,
+                       handler_admin_reciept.router)
     dp.include_router(handler_select_order.router)
     dp.include_routers(handler_personal_account.router,
                        handler_personal_data.router,
