@@ -51,7 +51,7 @@ async def process_del_admin(callback: CallbackQuery, state: FSMContext, bot: Bot
 async def process_forward_del_admin(callback: CallbackQuery, state: FSMContext, bot: Bot) -> None:
     """
     Пагинация по списку пользователей вперед
-    :param callback:
+    :param callback: executor_back_{str(back)}, executor_forward_{str(forward)}
     :param state:
     :param bot:
     :return:
@@ -59,7 +59,7 @@ async def process_forward_del_admin(callback: CallbackQuery, state: FSMContext, 
     logging.info(f'process_forward_del_admin: {callback.message.chat.id}')
     role = '<b>ИСПОЛНИТЕЛЕЙ</b>'
     list_users: list[User] = await rq.get_users_role(role=rq.UserRole.executor)
-    forward = int(callback.data.split('_')[3]) + 1
+    forward = int(callback.data.split('_')[-1]) + 1
     back = forward - 2
     keyboard = kb.keyboards_select_executor(list_executor=list_users,
                                             back=back,
@@ -86,7 +86,7 @@ async def process_back_del_admin(callback: CallbackQuery, state: FSMContext, bot
     logging.info(f'process_back_del_admin: {callback.message.chat.id}')
     role = '<b>ИСПОЛНИТЕЛЕЙ</b>'
     list_users = await rq.get_users_role(role=rq.UserRole.executor)
-    back = int(callback.data.split('_')[3]) - 1
+    back = int(callback.data.split('_')[-1]) - 1
     forward = back + 2
     keyboard = kb.keyboards_select_executor(list_executor=list_users,
                                             back=back,
