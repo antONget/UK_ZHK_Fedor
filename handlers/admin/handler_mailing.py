@@ -26,6 +26,9 @@ class Mailing(StatesGroup):
     notification = State()
 
 
+list_options_global = []
+
+
 # Персонал
 @router.message(F.text == 'Рассылка', IsSuperAdmin())
 @error_handler
@@ -52,6 +55,7 @@ async def servey_process(callback: CallbackQuery, state: FSMContext, bot: Bot):
     :return:
     """
     logging.info('survey_process')
+    list_options_global.clear()
     await callback.message.edit_text(text='Пришлите вопрос для проведения опроса',
                                      reply_markup=None)
     await state.set_state(Mailing.survey)
@@ -90,12 +94,12 @@ async def poll(message: Message, state: FSMContext, bot: Bot):
     data = await state.get_data()
     list_option: list = data['list_option']
     list_option.append(message.text)
+    list_options_global.append(message.text)
+    await state.update_data(list_option=list_option)
     if len(list_option) > 1:
-        await state.update_data(options=list_option)
         await message.answer_poll(question=data['question_survey'],
                                   options=list_option,
-                                  type='quiz',
-                                  correct_option_id=1,
+                                  type=None,
                                   is_anonymous=False)
         await message.answer(text='Вы можете добавить вариант ответа или отправить опрос в рассылку',
                              reply_markup=kb.keyboard_send_servey())
@@ -105,7 +109,7 @@ async def poll(message: Message, state: FSMContext, bot: Bot):
 
 @router.callback_query(F.data == 'send_survey')
 @error_handler
-async def send_survey(callback: CallbackQuery, state: FSMContext, bot: Bot):
+async def send_survey(callback: CallbackQuery, state: FSMContext, bot: Bot, list_options_global: list):
     """
     Отправка опроса
     :param callback:
@@ -117,7 +121,7 @@ async def send_survey(callback: CallbackQuery, state: FSMContext, bot: Bot):
     users_list: list[User] = await rq.get_users_role(role=rq.UserRole.user)
     data: dict = await state.get_data()
     question: str = data['question_survey']
-    options: list = data['options']
+    options: list = data['list_option']
     await callback.message.answer(text=f'Рассылка опроса запущена на {len(users_list)} пользователей')
     count: int = 0
     for user in users_list:
@@ -131,23 +135,33 @@ async def send_survey(callback: CallbackQuery, state: FSMContext, bot: Bot):
             count += 1
         except:
             pass
-    await callback.message.answer(text=f'Опрос успешно разослан до {count}/{len(users_list)} пользователей')
+    await callback.message.edit_text(text=f'Опрос успешно разослан до {count}/{len(users_list)} пользователей')
 
 
 @router.poll_answer()
 @error_handler
-async def poll_answer(poll_answer: PollAnswer, bot: Bot):
+async def poll_answer(poll_answer: PollAnswer, state: FSMContext, bot: Bot):
     """
     Получаем результаты опроса
     :param poll_answer:
+    :param state:
+    :param bot:
     :return:
     """
     logging.info('poll_answer')
-    answer_ids = poll_answer.option_ids  # list of answers
+    answer_ids = poll_answer.option_ids
+    print(poll_answer)
     user_id = poll_answer.user.id
     poll_id = poll_answer.poll_id
+    option_ids = poll_answer.option_ids
+    print(option_ids)
+    print(list_options_global)
+    data = await state.get_data()
+    # list_option = data['list_option']
+    text = f'Пользователь @{poll_answer.user.username} ответил на опрос: {list_options_global[option_ids[0]]}'
+    # text=f'answer_ids: {answer_ids}, user_id: {user_id}, poll_id: {poll_id}',
     await send_message_admins_text(bot=bot,
-                                   text=f'answer_ids: {answer_ids}, user_id: {user_id}, poll_id: {poll_id}',
+                                   text=text,
                                    keyboard=None)
 
 
