@@ -185,6 +185,7 @@ async def get_orders_all_status(status: str) -> list[Order]:
         return list_order
 
 
+
 async def set_order_status(order_id: int, status: str) -> None:
     """
     Обновление статуса заявки

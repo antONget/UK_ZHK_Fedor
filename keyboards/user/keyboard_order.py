@@ -6,6 +6,7 @@ from database.models import User
 def keyboard_type_report() -> InlineKeyboardMarkup:
     """
     Клавиатура для выбора типа заявки
+    [[Частные],[Общедомовые]]
     :return:
     """
     logging.info("keyboard_type_report")

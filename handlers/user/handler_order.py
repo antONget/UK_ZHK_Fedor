@@ -104,8 +104,14 @@ async def send_order(callback: CallbackQuery, state: FSMContext, bot: Bot) -> No
         await state.set_state(OrderState.photo_order)
     elif answer == 'continue':
         await state.set_state(OrderState.deadline)
-        await callback.message.edit_text(text='Пришлите срок выполнения заявки в днях',
-                                         reply_markup=None)
+        data = await state.get_data()
+        if data["type_order"] == 'private':
+            await callback.message.edit_text(text='Укажите дату и время удобное для выполнения заявки, например:'
+                                                  ' пн-пт с 08:00 до 17:00',
+                                             reply_markup=None)
+        else:
+            await callback.message.edit_text(text='Пришлите срок выполнения заявки в днях',
+                                             reply_markup=None)
     await callback.answer()
 
 
@@ -120,37 +126,43 @@ async def get_deadline(message: Message, state: FSMContext, bot: Bot) -> None:
     :return:
     """
     logging.info(f'get_deadline: {message.from_user.id}')
-    if not message.text.isdigit():
-        await message.answer(text='Некорректно указано количество дней для выполнения заявки')
+    data = await state.get_data()
+    data_order_ = message.text
+    current_date = datetime.now()
+    if data["type_order"] == 'private':
+        pass
     else:
+        if not message.text.isdigit():
+            await message.answer(text='Некорректно указано количество дней для выполнения заявки')
+            return
         deadline = int(message.text)
-        data = await state.get_data()
-        current_date = datetime.now()
         deadline_data = current_date + timedelta(days=deadline)
-        deadline_data_str = deadline_data.strftime('%d-%m-%Y %H:%M')
-        current_date_str = current_date.strftime('%d-%m-%Y %H:%M')
-        data_order = {"tg_id": message.from_user.id,
-                      "type_order": data["type_order"],
-                      "text_order": data["text_order"],
-                      "photo_ids": ','.join(data["photo_order"]) if data["photo_order"] else '',
-                      "status": rq.OrderStatus.create,
-                      "date_create": current_date_str,
-                      "deadline": deadline_data_str}
-        order_id: int = await rq.add_order(data=data_order)
-        await message.answer(text=f'Ваша обращение передана, ей присвоен номер № {order_id}')
-        if data["photo_order"]:
-            await send_message_admins_photo(bot=bot,
-                                            list_ids=data["photo_order"],
-                                            caption=data["text_order"])
-            await send_message_admins_text(bot=bot,
-                                           text=f'Пользователь <a href="tg://user?id={message.from_user.id}">'
-                                                f'{message.from_user.username}</a> разместил заявку'
-                                                f' № {order_id} - {data["type_order"]}',
-                                           keyboard=kb.keyboard_assign_performer(order_id=order_id))
-        else:
-            await send_message_admins_text(bot=bot,
-                                           text=f'Пользователь <a href="tg://user?id={message.from_user.id}">'
-                                                f'{message.from_user.username}</a> разместил заявку'
-                                                f' № {order_id} - - {data["type_order"]}\n\n'
-                                                f'{data["text_order"]}',
-                                           keyboard=kb.keyboard_assign_performer(order_id=order_id))
+        data_order_ = deadline_data.strftime('%d-%m-%Y %H:%M')
+    data_order = current_date.strftime('%d-%m-%Y %H:%M')
+    data_order = {"tg_id": message.from_user.id,
+                  "type_order": data["type_order"],
+                  "text_order": data["text_order"],
+                  "photo_ids": ','.join(data["photo_order"]) if data["photo_order"] else '',
+                  "status": rq.OrderStatus.create,
+                  "date_create": data_order_,
+                  "deadline": data_order}
+    order_id: int = await rq.add_order(data=data_order)
+    await message.answer(text=f'Ваша обращение передана, ей присвоен номер № {order_id}')
+    if data["photo_order"]:
+        await send_message_admins_photo(bot=bot,
+                                        list_ids=data["photo_order"],
+                                        caption=data["text_order"])
+        await send_message_admins_text(bot=bot,
+                                       text=f'Пользователь <a href="tg://user?id={message.from_user.id}">'
+                                            f'{message.from_user.username}</a> разместил заявку'
+                                            f' № {order_id} - {data["type_order"]}\n'
+                                            f'Время выполнения: {data_order_}',
+                                       keyboard=kb.keyboard_assign_performer(order_id=order_id))
+    else:
+        await send_message_admins_text(bot=bot,
+                                       text=f'Пользователь <a href="tg://user?id={message.from_user.id}">'
+                                            f'{message.from_user.username}</a> разместил заявку'
+                                            f' № {order_id} - {data["type_order"]}\n\n'
+                                            f'{data["text_order"]}\n'
+                                            f'Время выполнения: {data_order_}',
+                                       keyboard=kb.keyboard_assign_performer(order_id=order_id))

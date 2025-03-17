@@ -109,7 +109,7 @@ async def poll(message: Message, state: FSMContext, bot: Bot):
 
 @router.callback_query(F.data == 'send_survey')
 @error_handler
-async def send_survey(callback: CallbackQuery, state: FSMContext, bot: Bot, list_options_global: list):
+async def send_survey(callback: CallbackQuery, state: FSMContext, bot: Bot):
     """
     Отправка опроса
     :param callback:
@@ -129,7 +129,7 @@ async def send_survey(callback: CallbackQuery, state: FSMContext, bot: Bot, list
             await bot.send_poll(chat_id=user.tg_id,
                                 question=question,
                                 options=options,
-                                type='quiz',
+                                type='regular',
                                 correct_option_id=1,
                                 is_anonymous=False)
             count += 1
@@ -149,17 +149,11 @@ async def poll_answer(poll_answer: PollAnswer, state: FSMContext, bot: Bot):
     :return:
     """
     logging.info('poll_answer')
-    answer_ids = poll_answer.option_ids
-    print(poll_answer)
-    user_id = poll_answer.user.id
-    poll_id = poll_answer.poll_id
     option_ids = poll_answer.option_ids
-    print(option_ids)
-    print(list_options_global)
     data = await state.get_data()
-    # list_option = data['list_option']
-    text = f'Пользователь @{poll_answer.user.username} ответил на опрос: {list_options_global[option_ids[0]]}'
-    # text=f'answer_ids: {answer_ids}, user_id: {user_id}, poll_id: {poll_id}',
+    text = f'Пользователь @{poll_answer.user.username} ответил на опрос\n' \
+           f'{data["question_survey"]}: {list_options_global[option_ids[0]]}'
+
     await send_message_admins_text(bot=bot,
                                    text=text,
                                    keyboard=None)

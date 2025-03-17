@@ -88,5 +88,27 @@ async def process_simple_calendar_finish(callback: CallbackQuery, callback_data:
     if selected:
         await state.update_data(finish_period=date_finish)
         await state.set_state(state=None)
-        await callback.message.answer(text='Статистика по категории заявки, уложился ли исполнитель в срок,'
-                                           ' оценка заявителя')
+        data = await state.get_data()
+        if await check_super_admin(telegram_id=callback.from_user.id):
+            list_orders_work: list[Order] = await rq.get_orders_all_status(status=rq.OrderStatus.work)
+            list_orders_completed: list[Order] = await rq.get_orders_all_status(status=rq.OrderStatus.completed)
+            list_orders_cancel: list[Order] = await rq.get_orders_all_status(status=rq.OrderStatus.cancel)
+            await callback.message.answer(text=f'Статистика по заявкам за период {data["date_start"]}-'
+                                               f'{data["finish_period"]}:\n'
+                                               f'Всего заявок: {len(list_orders_completed)+len(list_orders_work)+len(list_orders_cancel)}\n'
+                                               f'В работе: {len(list_orders_work)}\n'
+                                               f'Завершено: {len(list_orders_completed)}\n'
+                                               f'Отменено: {len(list_orders_cancel)}')
+        else:
+            list_orders_work: list[Order] = await rq.get_orders_tg_id_status(tg_id_executor=callback.from_user.id,
+                                                                             status=rq.OrderStatus.work)
+            list_orders_completed: list[Order] = await rq.get_orders_tg_id_status(tg_id_executor=callback.from_user.id,
+                                                                                  status=rq.OrderStatus.completed)
+            list_orders_cancel: list[Order] = await rq.get_orders_tg_id_status(tg_id_executor=callback.from_user.id,
+                                                                               status=rq.OrderStatus.cancel)
+            await callback.message.answer(text=f'Статистика по заявкам за период {data["date_start"]}-'
+                                               f'{data["finish_period"]}:\n'
+                                               f'Всего заявок: {len(list_orders_completed) + len(list_orders_work) + len(list_orders_cancel)}\n'
+                                               f'В работе: {len(list_orders_work)}\n'
+                                               f'Завершено: {len(list_orders_completed)}\n'
+                                               f'Отменено: {len(list_orders_cancel)}')
