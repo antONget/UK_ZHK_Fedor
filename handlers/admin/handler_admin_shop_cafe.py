@@ -117,7 +117,7 @@ async def send_order(callback: CallbackQuery, state: FSMContext, bot: Bot) -> No
     """
     logging.info(f'process_change_attribute: {callback.from_user.id} ')
     page = int(callback.data.split('_')[-1])
-    if callback.data.split('_')[-1] == 'del':
+    if callback.data.split('_')[-2] == 'del':
         await rq.del_infrastructures_id(id_=page)
         await callback.message.answer(text='Объект успешно удален')
         return
