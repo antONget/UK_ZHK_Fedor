@@ -93,8 +93,8 @@ async def process_simple_calendar_finish(callback: CallbackQuery, callback_data:
             list_orders_work: list[Order] = await rq.get_orders_all_status(status=rq.OrderStatus.work)
             list_orders_completed: list[Order] = await rq.get_orders_all_status(status=rq.OrderStatus.completed)
             list_orders_cancel: list[Order] = await rq.get_orders_all_status(status=rq.OrderStatus.cancel)
-            await callback.message.answer(text=f'Статистика по заявкам за период {data["start_period"]}-'
-                                               f'{data["finish_period"]}:\n'
+            await callback.message.answer(text=f'Статистика по заявкам за период {str(data["start_period"]).split(" ")[0]}-'
+                                               f'{str(data["finish_period"]).split(" ")[0]}:\n'
                                                f'Всего заявок: {len(list_orders_completed)+len(list_orders_work)+len(list_orders_cancel)}\n'
                                                f'В работе: {len(list_orders_work)}\n'
                                                f'Завершено: {len(list_orders_completed)}\n'
@@ -106,8 +106,8 @@ async def process_simple_calendar_finish(callback: CallbackQuery, callback_data:
                                                                                   status=rq.OrderStatus.completed)
             list_orders_cancel: list[Order] = await rq.get_orders_tg_id_status(tg_id_executor=callback.from_user.id,
                                                                                status=rq.OrderStatus.cancel)
-            await callback.message.answer(text=f'Статистика по заявкам за период {data["start_period"]}-'
-                                               f'{data["finish_period"]}:\n'
+            await callback.message.answer(text=f'Статистика по заявкам за период {str(data["start_period"]).split(" ")[0]}-'
+                                               f'{str(data["finish_period"]).split(" ")[0]}:\n'
                                                f'Всего заявок: {len(list_orders_completed) + len(list_orders_work) + len(list_orders_cancel)}\n'
                                                f'В работе: {len(list_orders_work)}\n'
                                                f'Завершено: {len(list_orders_completed)}\n'
