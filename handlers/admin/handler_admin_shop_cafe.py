@@ -119,7 +119,9 @@ async def send_order(callback: CallbackQuery, state: FSMContext, bot: Bot) -> No
     page = int(callback.data.split('_')[-1])
     if callback.data.split('_')[-2] == 'del':
         await rq.del_infrastructures_id(id_=page)
+        await callback.message.delete()
         await callback.message.answer(text='Объект успешно удален')
+        await callback.answer()
         return
     data = await state.get_data()
     type_object = data['type_object']
